@@ -1,0 +1,34 @@
+import requests
+import json
+import csv
+import pandas as pd
+import re
+
+lista_api = []
+lista_total_request = []
+lista_versao = []
+
+#Obtem a volumetria das APIs V1
+url = 'https://xxxxxxx.live.dynatrace.com/api/v2/metrics/query?metricSelector=calc%3Aservice.volumetria_apisv1%3AsplitBy%28Dimension%29%3Asum%3Aauto%3Asort%28value%28sum%2Cdescending%29%29%3Alimit%28100%29&from=now-7d'
+
+headers = {
+  'Authorization': 'Api-token xxxxxxxxxxxxxxxxxxx', 'Content-Type': 'application/json'
+}
+
+response = requests.request("GET", url, headers=headers, verify=False).content
+json_obj = json.loads(response)
+
+
+for i in json_obj['result']:
+  for d in i['data']:
+    for ap in d['dimensions']:
+      api = ap
+      lista_api.append(api)      
+    total_request = sum(filter(None, (h for h in d['values'])))
+    lista_total_request.append(total_request)
+    lista_versao.append('V1')
+    print('API: ',api,'Total Request: ',total_request)
+
+#Obtem a volumetria das APIs V2
+url2 = 'https://xxxxxxxxx.live.dynatrace.com/api/v2/metrics/query?metricSelector=calc%3Aservice.volumetria_apisv2%3AsplitBy%28Dimension%29%
+...

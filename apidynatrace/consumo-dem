@@ -1,0 +1,209 @@
+import requests, urllib3
+import json
+import pandas as pd
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def DEM_App(url):
+    #Capturar metrica sessions da aplicação sem replay
+    headers = {
+        'Authorization': 'Api-Token ' + str(token),
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.request("GET", url, headers=headers, verify=False).content
+    json_obj = json.loads(response)
+
+    #Armazena o id
+    for i in json_obj['result']:
+        for d in i['data']:
+           
+            for APPID in d['dimensions']:
+                #Utiliza o id para obter o nome da aplicação
+                try:
+                    url2 = DYNA_API_URL + '/api/config/v1/applications/web/' + APPID
+                    response2 = requests.request("GET", url2, headers=headers, verify=False).content
+                    details_app = json.loads(response2)
+                    for n in details_app:
+                        AppName = details_app['name']
+                except:
+                    print('ID com problema')
+                    AppName = "Item excluido (" + str(APPID) + ")"
+
+            AppName = AppName.replace('Ã','A').replace('Â','A').replace('À','A').replace('Ó','O').replace('Ç','C').replace('Õ','O').replace('ã','a').replace('é','e').replace('ê','e').replace('É','E').replace('Ê','E').replace('ç','c').replace('Ô','O').replace('Á','A').replace('í','i').replace('õ','o').replace('ó','o').replace('Í','I').replace('â','a').replace('á','a').replace('ú','u').replace('Ú','U')
+            print(AppName)
+            lista_nome.append(AppName)
+            #Realiza a soma dos valores de consumo de licença nos ultimos 30 dias    
+            custo = sum(filter(None, (h for h in d['values'])))
+            dem = round(custo * 0.25, 0)
+            print(dem)
+            lista_custo.append(dem)  
+            lista_ext.append('SessionApplication')
+            lista_data.append(dataLabel)
+            lista_environment.append(DYNA_ENVIRONMENT)
+           
+def DEM_Mobile(url):
+    headers = {
+        'Authorization': 'Api-Token ' + str(token),
+        'Content-Type': 'application/json'
+    }
+    response = requests.request("GET", url, headers=headers, verify=False).content
+    json_obj = json.loads(response)
+
+    #Armazena o id
+    for i in json_obj['result']:
+        for d in i['data']:
+            for MobileID in d['dimensions']:
+                #Utiliza o id para obter o nome do aplicativo Mobile
+                try:
+                    url2 = DYNA_API_URL + '/api/config/v1/applications/mobile/' + MobileID
+                    response2 = requests.request("GET", url2, headers=headers, verify=False).content
+                    details_mobile = json.loads(response2)
+                    for n in details_mobile:
+                        MobileName = details_mobile['name']
+                except:
+                    print('ID com problema')
+                    MobileName = "Item excluido (" + str(MobileID) + ")"
+
+            MobileName = MobileName.replace('Ã','A').replace('Â','A').replace('À','A').replace('Ó','O').replace('Ç','C').replace('Õ','O').replace('ã','a').replace('é','e').replace('ê','e').replace('É','E').replace('Ê','E').replace('ç','c').replace('Ô','O').replace('Á','A').replace('í','i').replace('õ','o').replace('ó','o').replace('Í','I').replace('â','a').replace('á','a').replace('ú','u').replace('Ú','U')
+            print(MobileName)
+            lista_nome.append(MobileName)
+            #Realiza a soma dos valores de consumo de licença nos ultimos 30 dias    
+            custo = sum(filter(None, (h for h in d['values'])))
+            dem = round(custo * 0.25, 0)
+            print(dem)
+            lista_custo.append(dem)
+            lista_ext.append('SessionMobile')
+            lista_data.append(dataLabel)
+            lista_environment.append(DYNA_ENVIRONMENT)
+
+def DEM_SyntheticAction(url):      
+    headers = {
+        'Authorization': 'Api-Token ' + str(token),
+        'Content-Type': 'application/json'
+    }
+    response = requests.request("GET", url, headers=headers, verify=False).content
+    json_obj = json.loads(response)
+
+    #Armazena o id
+    for i in json_obj['result']:
+        for d in i['data']:
+            for monitorid in d['dimensions']:
+                try:
+                    #Utiliza o id para obter o nome do sintetico
+                    url2 = DYNA_API_URL + '/api/v1/synthetic/monitors/' + monitorid
+                    response2 = requests.request("GET", url2, headers=headers, verify=False).content
+                    details_monitor = json.loads(response2)
+                    monitorName1 = details_monitor['name']
+                    print('Nome do sintetico: ',monitorName1)
+                    monitorName = monitorName1.replace('Ã','A').replace('Â','A').replace('À','A').replace('Ó','O').replace('Ç','C').replace('Õ','O').replace('ã','a').replace('é','e').replace('ê','e').replace('É','E').replace('Ê','E').replace('ç','c').replace('Ô','O').replace('Á','A').replace('í','i').replace('õ','o').replace('ó','o').replace('Í','I').replace('â','a').replace('á','a').replace('ú','u').replace('Ú','U')              
+
+                except:
+                    print('ID inexistente: Monitor was deleted')
+                    monitorName = "Item excluido (" + str(monitorid) + ")"
+                    continue
+
+            lista_nome.append(monitorName)
+            #Realiza a soma dos valores de consumo de licença nos ultimos 30 dias    
+            dem = sum(filter(None, (h for h in d['values'])))
+
+            #print(dem)
+            lista_custo.append(dem)
+            lista_ext.append('BrowserMonitor')
+            lista_data.append(dataLabel)
+            lista_environment.append(DYNA_ENVIRONMENT)
+
+def DEM_SyntheticRequest(url):
+    headers = {
+        'Authorization': 'Api-Token ' + str(token),
+        'Content-Type': 'application/json'
+    }
+    response = requests.request("GET", url, headers=headers, verify=False).content
+    json_obj = json.loads(response)
+    #reject_monitor_id = ['HTTP_CHECK-A66CCFDC091CCEF8','HTTP_CHECK-C5EE037B9CC56B7D','HTTP_CHECK-AD6F485203E1C4A6','HTTP_CHECK-854633DC1CC2E82F','HTTP_CHECK-591D526572B303D8','HTTP_CHECK-9A0373BBFBE81B59','HTTP_CHECK-E1D94D70812F689B','HTTP_CHECK-D1674654C104E3E8','HTTP_CHECK-0BB5705D9DE9232D','HTTP_CHECK-A51044BD3213BE2C','HTTP_CHECK-625C1BFADAE8DF65','HTTP_CHECK-A817451A4A420BAD','HTTP_CHECK-90CEEAEE256708E3', 'HTTP_CHECK-C406D91396FC72C1', 'HTTP_CHECK-6C3EC21AF66EF604', 'HTTP_CHECK-BF0C4E61C3B68698','HTTP_CHECK-D147645966ABCDAD', 'HTTP_CHECK-D4CB68C243F43D73', 'HTTP_CHECK-0F8A4AF0113908C6', 'HTTP_CHECK-2E87F995BEF407F9']
+
+    #Armazena o id
+    for i in json_obj['result']:
+        for d in i['data']:
+            for monitorid in d['dimensions']:
+                try:
+                    #Utiliza o id para obter o nome do sintetico
+                    url2 = DYNA_API_URL + '/api/v1/synthetic/monitors/' + monitorid
+                    response2 = requests.request("GET", url2, headers=headers, verify=False).content
+                    details_monitor = json.loads(response2)
+                    monitorName1 = details_monitor['name']
+                    print('Nome do sintetico: ',monitorName1)                
+                    monitorName1 = details_monitor['name']
+                    monitorName = monitorName1.replace('Ã','A').replace('Â','A').replace('À','A').replace('Ó','O').replace('Ç','C').replace('Õ','O').replace('ã','a').replace('é','e').replace('ê','e').replace('É','E').replace('Ê','E').replace('ç','c').replace('Ô','O').replace('Á','A').replace('í','i').replace('õ','o').replace('ó','o').replace('Í','I').replace('â','a').replace('á','a').replace('ú','u').replace('Ú','U')
+                except:
+                    print('ID inexistente: Monitor was deleted')
+                    monitorName = "Item excluido (" + str(monitorid) + ")"
+                    continue
+
+            lista_nome.append(monitorName)
+
+            #Realiza a soma dos valores de consumo de licença nos ultimos 30 dias
+            custo = sum(filter(None, (h for h in d['values'])))
+            dem = round(custo * 0.1, 0)
+            #print(dem)
+            lista_custo.append(dem)
+            lista_ext.append('HTTPMonitor')
+            lista_data.append(dataLabel)
+            lista_environment.append(DYNA_ENVIRONMENT)
+
+
+
+if __name__ == '__main__':
+    print("Processo Iniciado")
+
+
+    # Opening JSON file
+    f = open('config.json',)
+    # returns JSON object as a dictionary
+    dataEnvironment = json.load(f)
+    # Closing file
+    f.close()
+
+    threshold=1
+    lista_environment = []
+    lista_data = []
+    lista_ext = []
+    lista_nome = []
+    lista_custo = []
+
+    for dynaEnvironment in dataEnvironment["connections"]:
+       
+        DYNA_ENVIRONMENT = dynaEnvironment["environment"]
+        DYNA_API_URL = dynaEnvironment["url"]
+        DYNA_API_TOKEN = dynaEnvironment["token"]
+
+        token = DYNA_API_TOKEN
+
+        for data in dataEnvironment["datas"]:
+            dataFrom = data["from"]
+            dataTo = data["to"]
+            dataLabel = data["labelData"]
+
+            url = DYNA_API_URL + '/api/v2/metrics/query?metricSelector=builtin%3Abilling.apps.web.sessionsWithoutReplayByApplication%3AsplitBy%28%22dt.entity.application%22%29%3Alimit%281000%29&from=' + str(dataFrom) + '&to=' + str(dataTo)
+            DEM_App(url)
+
+            url = DYNA_API_URL + '/api/v2/metrics/query?metricSelector=builtin%3Abilling.apps.mobile.sessionsWithoutReplayByApplication%3AsplitBy%28%22dt.entity.mobile_application%22%29&from=' + str(dataFrom) + '&to=' + str(dataTo)
+            DEM_Mobile(url)  
+
+            url = DYNA_API_URL + '/api/v2/metrics/query?metricSelector=builtin%3Abilling.synthetic.actions%3AsplitBy%28%22dt.entity.synthetic_test%22%29%3Alimit%281000%29&from=' + str(dataFrom) + '&to=' + str(dataTo)
+            DEM_SyntheticAction(url)
+
+            url = DYNA_API_URL + '/api/v2/metrics/query?metricSelector=builtin%3Abilling.synthetic.requests%3AsplitBy%28%22dt.entity.http_check%22%29%3Alimit%281000%29&from=' + str(dataFrom) + '&to=' + str(dataTo)
+            DEM_SyntheticRequest(url)
+
+    #Armeneza as listas em arquivo .csv
+    dic = {
+        'DATA': lista_data,
+        'ENVIRONMENT': lista_environment,
+        'EXT': lista_ext,
+        'NAME': lista_nome,
+        'DEM': lista_custo
+    }
+    data = pd.DataFrame(dic)
+    data.to_csv('ConsumoDEM-Janeiro.csv')
+

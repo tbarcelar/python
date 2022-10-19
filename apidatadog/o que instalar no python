@@ -1,0 +1,10 @@
+
+Antes de iniciar veja o que necessita instalar  
+
+Segue a lista
+
+1 -  pip install requests
+2 -  pip install datadog
+3 -  pip3 install datadog-api-client
+4 -  pip install pandas
+5 -  pip install openyxl

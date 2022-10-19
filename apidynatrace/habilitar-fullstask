@@ -1,0 +1,26 @@
+import requests
+import json
+import pandas as pd
+
+headers = {
+   # 'accept': '*/*',
+    'Authorization': 'Api-Token xxxxxxxxxxxxxxxxxx',
+    'Content-Type': 'application/json; charset=utf-8',
+}
+
+data = '{"monitoringEnabled":true,"monitoringMode":"FULL_STACK"}'
+
+response = requests.put('https://dynatracewebpre.dcbr01.corp/e/xxxxxxxx/api/config/v1/hosts/HOST-96FD171FB1D9D784/monitoring', headers=headers, data=data,verify=False).text
+
+ 
+
+#obj = json.loads(response)
+
+#host = pd.DataFrame(obj)
+
+
+
+listar.to_excel('C:/Users/xxxxx/.vscode/extensions/ms-python.python-2021.2.633441544/resulta.xlsx', index = False)
+
+
+

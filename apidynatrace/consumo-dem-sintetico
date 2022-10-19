@@ -1,0 +1,79 @@
+import requests
+import json
+import csv
+import pandas as pd
+
+print("Processo Iniciado")
+
+threshold=1
+lista_nome = []
+lista_custo = []
+lista_count = []
+lista_frequencia = []
+lista_app = []
+
+#Capturar metrica de actions do sintetico
+url = 'https://dynatrace.com.br/e/xxxxxxxxxxxx/api/v2/metrics/query?metricSelector=builtin%3Abilling.synthetic.actions%3AsplitBy%28%22dt.entity.synthetic_test%22%29%3Alimit%281000%29&from=1635735600000&to=1638327600000'
+
+payload = ""
+headers = {
+  'Authorization': 'Api-Token xxxxxxxxxx-ea', 'Content-Type': 'application/json'
+}
+response = requests.request("GET", url, headers=headers, data=payload).content
+json_obj = json.loads(response)
+
+#Armazena o id
+for i in json_obj['result']:
+    for d in i['data']:
+      try:
+        for monitorid in d['dimensions']:
+            #Utiliza o id para obter o nome do sintetico
+                url2 = 'https://dynatrace.com.br/e/xxxxxxxxxxxxxxxx/api/v1/synthetic/monitors/' + monitorid
+                response2 = requests.request("GET", url2, headers=headers, data=payload).content
+                details_monitor = json.loads(response2)
+                monitorName1 = details_monitor['name']
+                print('Nome do sintetico: ',monitorName1)
+                monitorName = monitorName1.replace('Ã','A').replace('Â','A').replace('À','A').replace('Ó','O').replace('Ç','C').replace('Õ','O').replace('ã','a').replace('é','e').replace('ê','e').replace('É','E').replace('Ê','E').replace('ç','c').replace('Ô','O').replace('Á','A').replace('í','i').replace('õ','o').replace('ó','o').replace('Í','I').replace('â','a').replace('á','a').replace('ú','u').replace('Ú','U')              
+                frequencia = details_monitor['frequencyMin']
+                appl = details_monitor.get('automaticallyAssignedApps', 'Nao possui aplicacao vinculada')
+                for a in appl:
+                  if (a != None):
+                    url3 = 'https://dynatrace.com.br/e/xxxxxxxxxxxxxxx/api/config/v1/applications/web/' + a
+                    response3 = requests.request("GET", url3, headers=headers, data=payload).content
+                    details_appl = json.loads(response3)
+                    appName = details_appl['name']
+                    print('Aplicacao vinculada: ',appName)
+                    #lista_app.append(appName)
+                count = 0
+                lista_elements = []              
+                for l in details_monitor['locations']:
+                  lista_elements.append(l)
+                  contador = len(lista_elements)
+                  lista_nome.append(monitorName)
+                  lista_frequencia.append(frequencia)
+                  lista_count.append(contador)  
+
+
+        #Realiza a soma dos valores de consumo de licença nos ultimos 30 dias    
+                  dem = sum(filter(None, (h for h in d['values'])))
+        #dem = custo * 0.25
+                #print(dem)
+                  lista_custo.append(dem)
+      except:
+        print('ID inexistente')
+        continue
+
+ 
+#Armeneza as listas em arquivo .csv
+monitor_Name = lista_nome
+frequencia2 = lista_frequencia
+contador2 = lista_count
+dem_2 = lista_custo
+#app2 = lista_app
+dic = {'NAME': monitor_Name, 'Frequencia_Execucao': frequencia2, 'Qtd_Locations': contador2, 'DEM': dem_2}
+data = pd.DataFrame.from_dict(dic)
+df = data.drop_duplicates(subset=['NAME', 'Frequencia_Execucao', 'DEM'], keep='last', inplace=False, ignore_index=False)
+df.to_csv('BrowserMonitor.csv')
+           
+
+

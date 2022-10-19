@@ -1,0 +1,19 @@
+import requests
+import json
+
+headers = {
+    'accept': 'application/json; charset=utf-8',
+    'Authorization': 'Api-Token xxxxxxxxxxxx',
+}
+
+params = (
+    ('includeDetails', 'true'),
+)
+
+response = requests.get('https://dynatracewebpre.dcbr01.corp/e/xxxxxxxxxxx/api/v1/entity/infrastructure/processes', headers=headers, params=params, verify=False).text
+
+ver = json.loads(response)
+print(ver)
+
+
+

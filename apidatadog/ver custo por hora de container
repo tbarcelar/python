@@ -1,0 +1,37 @@
+# importar a bibliotecas
+
+import requests
+import json
+import pandas as pd
+import csv
+
+# autenticar no datadog
+
+headers = {
+  'Content-Type': 'application/json',
+  'DD_API_KEY': "xxxxxxxxxx",
+  'DD-APPLICATION-KEY': "xxxxxxxxxxxxxxxxxxx",
+  
+}
+
+# inserir o filtro que deseja buscar - nesse caso o inicio do custo que é obrigatório
+
+payload = {
+    'start_hr': '2022-04-04T10:00:00',
+}
+
+# buscar no datadog a informação
+
+response = requests.get('https://api.datadoghq.com/api/v1/usage/hosts', headers=headers, params=payload).text
+
+# carregar em formato de json
+obj = json.loads(response)
+
+# transformar o json em Dataframe
+df =pd.json_normalize(obj['usage'])
+
+# ver na tela a informação
+print(df)
+
+# se quiser salvar como arquivo csv remover a hashtag abaixo
+#df.to_excel('salvo.xlsx')

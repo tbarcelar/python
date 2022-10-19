@@ -1,0 +1,32 @@
+import requests
+import json
+import csv
+
+# leitura do arquivo com separador por ;
+df = csv.reader(open('C:/Users/xxxxx/.vscode/extensions/ms-python.python-2021.2.633441544/disable_host.csv'), delimiter=';')
+payload_put = json.dumps({"monitoringEnabled": False, "monitoringMode": "FULL_STACK"})
+
+
+for [host] in df:
+    url = 'https://dynatracewebpre.dcbr01.corp/e/ID do ambiante /api/v2/entities?entitySelector=type%28%22HOST%22%29%2CentityName%28%22' + host + '%22%29'
+    payload = ""
+    headers = {
+    'Authorization': 'Api-Token xxxxxxxxx-ea ', 'Content-Type': 'application/json'
+    }
+    response = requests.request("GET", url, headers=headers, data=payload).content
+    json_obj = json.loads(response)
+
+    for i in json_obj['entities']:
+        entityId = i['entityId']
+        url2 = 'https://dynatracewebpre.dcbr01.corp/e/ID do ambiente /api/config/v1/hosts/' + entityId + '/monitoring'
+        response2 = requests.request("PUT", url2, headers=headers, data=payload_put).content
+
+        # desabilitar os hosts
+
+        url3 = 'https://dynatracewebpre.dcbr01.corp/e/ID do ambiente/api/config/v1/hosts/' + entityId + '/monitoring'
+        response3 = requests.request("GET", url3, headers=headers, data=payload).content
+        details_entity = json.loads(response3)        
+        monitoring = details_entity['monitoringEnabled']
+        print("Servidor " + host + " com status:", monitoring)              
+
+

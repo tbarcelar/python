@@ -1,0 +1,24 @@
+from selenium import webdriver
+import time 
+navegador = webdriver.Chrome()
+
+# Pagina para logar
+navegador.get('xxxxxxxxxx')
+# tempo de espera para carregar a pagina
+time.sleep(3)
+
+#Pegar o botão de e-mail e inserir o e-mail
+navegador.find_element_by_xpath('//*[@id="username"]').send_keys("xxxxxx@gmail.com")
+
+#Pegar o botão de senha e inserir a senha
+navegador.find_element_by_xpath('//*[@id="password"]').send_keys('xxxxx')
+# tempo de espera para carregar a pagina
+time.sleep(3)
+
+# Abrir uma nova aba
+navegador.execute_script("window.open('https://xxxxxxxxxxxxxx', '_blank');")
+
+# Para fecha a pagina aberta
+driver.close() 
+
+

@@ -1,0 +1,35 @@
+config
+
+
+{
+    "connections" : [
+
+        {
+            "environment" : "Producao",
+            "url" : "https://dynatrace.com/e/xxxxxxxxxxxx",
+            "token" : "xxxxxxxxxxxxxxxxxxxxx",
+            "exception" : [
+                {
+                    "hostName" : "xxxxxxxxxxxxxxxxx",
+                    "condition" : "equalHost",
+                    "oneAgentVersion" : "1.197.159.20200902-195357"
+                },
+
+                {
+                    "hostName" : "xxxxxxxxxxxxx",
+                    "condition" : "equalHost",
+                    "description" : "xxxxxxx"
+ 
+                    "condition" : "equalHostGroup",
+                    "oneAgentVersion" : "1.213.210.20210511-191341",
+                    "hostGroup" : "xxxxxxxxxxxxxxxx"
+                },
+            ],
+    "datas" : [
+        {
+            "labelData" : "parcial jan/2021",
+            "from" : "1641006000000",
+            "to" : "1643598000000"
+        }
+    ]
+}

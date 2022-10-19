@@ -1,0 +1,23 @@
+import requests
+import json
+import pandas as pd
+
+headers = {
+    'accept': 'application/json; charset=utf-8',
+     'Authorization': 'Api-Token xxxxxxxxxx', 'Content-Type': 'application/json'
+    }
+params = (
+    ('includeProcessGroupReferences', 'false'),
+)
+response = requests.get('https://dynatracewebpre.dcbr01.corp/e/xxxxxxxxx/api/config/v1/managementZones', headers=headers, verify=False).text
+obj = json.loads(response)
+
+mz = pd.DataFrame(obj)
+#print(host.keys())
+
+for mzz in mz.items():
+   for listar in mzz:
+     print("=" + str(listar))
+
+listar.to_excel('C:/Users/xxxxxx/.vscode/extensions/ms-python.python-2021.2.633441544/scripts/mz.xlsx', index = False)
+

@@ -1,0 +1,41 @@
+# importar bibliotecas
+
+import requests
+import json
+import pandas as pd
+import urllib3
+urllib3.disable_warnings()
+
+# inserir token
+
+headers = {
+    'accept': 'application/json; charset=utf-8',
+    'Authorization': 'Api-Token xxxxx ',
+}
+
+# filtrar o que deseja buscar
+
+payload  = (
+    ('includeDetails', 'true'),
+    ('relativeTime', 'month'),
+    ('osType', 'LINUX'),
+    ('detailedAvailabilityState', 'MONITORED'),
+    ('agentVersionNumber', '1.229.178'),
+)
+
+# puxar as informações do dynatrace
+
+response   = requests.request("GET", 'https://idAmbiente.live.dynatrace.com/api/v1/oneagents?', headers=headers, params=payload , verify=False).text
+
+# converter o arquivo
+
+lista = json.loads(response)
+df = pd.json_normalize(lista['hosts'])
+
+# listar do arquivos os nomes dos hosts que tem o agent
+
+dr2 = df.loc[:,]['hostInfo.displayName']
+print(dr2)
+
+# salvar o arquivo no formato csv
+dr2.to_csv("salvarlista.csv")

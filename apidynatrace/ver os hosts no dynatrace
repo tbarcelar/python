@@ -1,0 +1,41 @@
+# importar bibliotecas
+
+import requests
+import json
+import pandas as pd
+import urllib3
+urllib3.disable_warnings()
+
+# inserir token
+
+headers = {
+    'accept': 'application/json; charset=utf-8',
+    'Authorization': 'Api-Token xxxxxxxxx',
+}
+
+# filtrar o que deseja buscar
+
+payload  = (
+    ('includeDetails', 'true'),
+    ('osType', 'LINUX'),
+    ('detailedAvailabilityState', 'MONITORED'),
+    ('agentVersionNumber', '1.229.178'),
+)
+
+# puxar as informações do dynatrace
+
+response   = requests.request("GET", 'https://IdAmbiente.live.dynatrace.com/api/v1/entity/infrastructure/hosts', headers=headers, params=payload , verify=False).text
+
+# converter o arquivo
+
+obj = json.loads(response)
+df = pd.DataFrame(obj)
+
+# listar do arquivos os nomes dos hosts
+
+df2 = df.loc[:,]['displayName']
+print(df2)
+
+# salvar o arquivo no formato csv
+
+df2.to_csv("salvarhost.csv")

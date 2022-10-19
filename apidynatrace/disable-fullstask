@@ -1,0 +1,67 @@
+import csv
+import json
+import requests,  urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Opening JSON file
+f = open('config.json',)
+# returns JSON object as a dictionary
+dataConfig = json.load(f)
+# Closing file
+f.close()
+
+# Produção
+DYNA_API_URL = "https://dynatraceweb.com/e/xxxxxxxxxxxx"
+DYNA_API_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Homologação
+DYNA_API_URL = "https://dynatraceweb.com/e/xxxxxxxxxxxx"
+DYNA_API_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxx"
+
+
+arquivo = open('Hosts.csv')
+linhas = csv.DictReader(arquivo)
+
+# Desativar monitoração
+Payload = {
+    "monitoringEnabled": "true",
+    "monitoringMode": "CLOUD_INFRASTRUCTURE"
+    }
+
+
+header = {
+    'Authorization': 'Api-Token ' + DYNA_API_TOKEN,
+    'Content-Type': 'application/json; charset=utf-8'
+}
+# Ativar monitoração
+#Payload = {
+#    "monitoringEnabled": "true",
+#    "monitoringMode": "FULL_STACK"
+#    }
+
+def consultarHost(url, host, domain):
+    response = requests.get(url + host.lower() + domain, headers=header, verify=False)
+    response = response.json()
+    if len(response) == 0:
+        response = requests.get(url + host.upper() + domain, headers=header, verify=False)
+        response = response.json()
+
+    return response
+
+for linha in linhas:
+    print(linha["host"])
+
+    for dominio in dataConfig["dominios"]:
+        ret = consultarHost(DYNA_API_URL + '/api/v1/entity/infrastructure/hosts?tag=Hostname:', linha["host"], dominio['dominio'])
+
+        if len(ret) > 0:
+            displayName = ret[0]["displayName"]
+           
+            url = DYNA_API_URL + '/api/config/v1/hosts/' + ret[0]["entityId"] + '/monitoring?Api-Token=' + DYNA_API_TOKEN
+            #rDYNAP = requests.put(url, json=Payload, verify=False)
+            #print(f'rDYNAP={rDYNAP}')          
+           
+            hostLocalizado = True
+
+            break
+

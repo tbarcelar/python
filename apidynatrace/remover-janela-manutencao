@@ -1,0 +1,70 @@
+import csv
+import requests
+import codecs, json
+import pandas as pd
+from datetime import datetime, timedelta
+
+list_id_expired = []
+list_name_expired = []
+list_end_expired = []
+list_end_active = []
+list_id_active = []
+list_name_active = []
+
+headers = {'Authorization': 'Api-Token xxxxxxxxxxxx'}
+url_windows = ("https://dynatrace.com.br/e/xxxxxxxxxxxxxx/api/config/v1/maintenanceWindows")
+request_windows = requests.request("GET", url_windows, headers=headers).content
+json_request = json.loads(request_windows)
+today_date = datetime.today()
+
+for i in json_request['values']:
+    try:
+        request_id = i['id']
+        request_name = i['name']
+        url_id = ("https://dynatrace.com.br/e/xxxxxxxxxxx/api/config/v1/maintenanceWindows/" + request_id)
+        request_window_id = requests.request("GET", url_id, headers=headers).content
+        json_window_id = json.loads(request_window_id)
+
+        for j in json_window_id:
+            if j == 'schedule':
+                end_date_timestamp = json_window_id['schedule']['end']
+                end_date_cut = end_date_timestamp[0:10]
+                end_date = datetime.strptime(end_date_cut, "%Y-%m-%d")
+                limit_date = today_date - timedelta(days=30)
+
+                if limit_date > end_date:
+                    list_end_expired.append(end_date)
+                    list_id_expired.append(request_id)
+                    list_name_expired.append(request_name)
+                    with codecs.open(request_id + '.json', 'w', 'utf8') as f:
+                        f.write(json.dumps(json_window_id, sort_keys=True, ensure_ascii=False))
+
+                    delete_window = requests.delete(url_id, headers=headers)
+
+                else:
+                    list_end_active.append(end_date)
+                    list_id_active.append(request_id)
+                    list_name_active.append(request_name)
+
+    except:
+        print('Falha na conexão, retomando atividade.')
+        continue
+
+time_date = str(today_date)
+date_now = time_date[0:10]
+
+id_expired = list_id_expired
+name_expired = list_name_expired
+end_expired = list_end_expired
+dic_expired = {'ID': id_expired, 'NAME': name_expired, 'END': end_expired}
+data_expired = pd.DataFrame(dic_expired)
+data_expired.to_csv('janelas_deletadas_' + date_now + '.csv')
+
+id_active = list_id_active
+name_active = list_name_active
+end_active = list_end_active
+dic_active = {'ID': id_active, 'NAME': name_active, 'END': end_active}
+data_active = pd.DataFrame(dic_active)
+data_active.to_csv('janelas_ativas_' + date_now + '.csv')
+
+
